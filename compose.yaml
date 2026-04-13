@@ -1,0 +1,9 @@
+name: psr-4-example
+
+services:
+
+  application:
+    container_name: psr-4-example-app
+    build: .
+    volumes:
+      - ./:/code

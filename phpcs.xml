@@ -1,0 +1,15 @@
+<ruleset xmlns:xsi="http://w3.org" name="PHPLab_PSR-4" xsi:noNamespaceSchemaLocation="vendor/squizlabs/php_codesniffer/phpcs.xsd">
+    <description>Ruleset for PSR-4 Autoloading</description>
+
+    <arg name="colors"/>
+    <arg value="sp"/>
+    <arg name="extensions" value="php"/>
+
+    <config name="installed_paths" value="/var/www/vendor/squizlabs/php_codesniffer/src/Standards"/>
+
+    <file>src</file>
+    <file>tests</file>
+
+    <rule ref="PSR1"/>
+    <rule ref="PSR12"/>
+</ruleset>
