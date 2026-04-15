@@ -66,6 +66,16 @@ class AutoloaderTest extends TestCase
         $this->assertClassDoesNotExist('\Vendor\Package\Nonexistent');
     }
 
+    #[Test]
+    public function existentClassFromRegisteredExistentNamespaceAndRegisteredExistentPathCanBeLoaded()
+    {
+        $path = $this->getFullFixturePath('/src');
+
+        $this->autoloader->registerNamespacePath('Vendor\Package', $path);
+
+        $this->assertClassIsInstantiable('\Vendor\Package\Existent');
+    }
+
     /**
      * Assert class does not exist.
      *
@@ -76,6 +86,21 @@ class AutoloaderTest extends TestCase
         $classIncluded = class_exists($class);
 
         parent::assertFalse($classIncluded);
+    }
+
+    /**
+     * Assert there is possibility of creating an instance
+     * of the given class.
+     *
+     * @param string $class
+     */
+    protected static function assertClassIsInstantiable(string $class): void
+    {
+        $object = new $class();
+
+        parent::assertInstanceOf($class, $object);
+
+        unset($object);
     }
 
     /**
