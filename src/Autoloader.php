@@ -20,6 +20,13 @@ class Autoloader
     }
 
     /**
+     * Unregister autoloading function.
+     */
+    public function unregister(): void
+    {
+    }
+
+    /**
      * Register namespace and assign a directory path.
      *
      * @param string $namespace
