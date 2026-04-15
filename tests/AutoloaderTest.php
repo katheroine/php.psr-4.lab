@@ -76,6 +76,16 @@ class AutoloaderTest extends TestCase
         $this->assertClassIsInstantiable('\Vendor\Package\Existent');
     }
 
+    #[Test]
+    public function registeredCorrectNamespaceWorksWithTrailingBackslash()
+    {
+        $path = $this->getFullFixturePath('/src');
+
+        $this->autoloader->registerNamespacePath('Vendor\Package\\', $path);
+
+        $this->assertClassIsInstantiable('\Vendor\Package\Existent');
+    }
+
     /**
      * Assert class does not exist.
      *
