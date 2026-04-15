@@ -2,6 +2,6 @@
 
 namespace Vendor\Package;
 
-class Existent
+class ExistentThree
 {
 }

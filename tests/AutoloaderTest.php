@@ -11,6 +11,7 @@ declare(strict_types=1);
 namespace PHPLab\StandardPSR4;
 
 use PHPUnit\Framework\Attributes\Test;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\RunTestsInSeparateProcesses;
 use PHPUnit\Framework\TestCase;
 
@@ -77,6 +78,17 @@ class AutoloaderTest extends TestCase
     }
 
     #[Test]
+    #[DataProvider('existentImmediateClassFullyQualifiedNamesProvider')]
+    public function existentClassesFromRegisteredExistentNamespaceAndRegisteredExistentPathCanBeLoaded(string $classFullyQualifiedName)
+    {
+        $path = $this->getFullFixturePath('/src');
+
+        $this->autoloader->registerNamespacePath('Vendor\Package\\', $path);
+
+        $this->assertClassIsInstantiable($classFullyQualifiedName);
+    }
+
+    #[Test]
     public function registeredCorrectNamespaceWorksWithTrailingBackslash()
     {
         $path = $this->getFullFixturePath('/src');
@@ -96,18 +108,6 @@ class AutoloaderTest extends TestCase
         $this->assertClassIsInstantiable('\Vendor\Package\Existent');
     }
 
-    /**
-     * Assert class does not exist.
-     *
-     * @param string $class
-     */
-    protected static function assertClassDoesNotExist(string $class): void
-    {
-        $classIncluded = class_exists($class);
-
-        parent::assertFalse($classIncluded);
-    }
-
     #[Test]
     public function caseSensitivityIsEnforcedForRequestedFullyQualifiedClassName()
     {
@@ -118,6 +118,18 @@ class AutoloaderTest extends TestCase
         $this->assertClassDoesNotExist('\vendor\package\existent');
         $this->assertClassDoesNotExist('\Vendor\package\existent');
         $this->assertClassDoesNotExist('\Vendor\Package\existent');
+    }
+
+    /**
+     * Assert class does not exist.
+     *
+     * @param string $class
+     */
+    protected static function assertClassDoesNotExist(string $class): void
+    {
+        $classIncluded = class_exists($class);
+
+        parent::assertFalse($classIncluded);
     }
 
     /**
@@ -133,6 +145,15 @@ class AutoloaderTest extends TestCase
         parent::assertInstanceOf($class, $object);
 
         unset($object);
+    }
+
+    public static function existentImmediateClassFullyQualifiedNamesProvider(): array
+    {
+        return [
+            ['\Vendor\Package\ExistentOne'],
+            ['\Vendor\Package\ExistentTwo'],
+            ['\Vendor\Package\ExistentThree'],
+        ];
     }
 
     /**
