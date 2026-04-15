@@ -120,6 +120,16 @@ class AutoloaderTest extends TestCase
     }
 
     #[Test]
+    public function properNestedClassesCanBeLoaded()
+    {
+        $path = $this->getFullFixturePath('/src');
+
+        $this->autoloader->registerNamespacePath('Vendor\Package\\', $path);
+
+        $this->assertClassIsInstantiable('\Vendor\Package\Namespace\OneLevelNested');
+    }
+
+    #[Test]
     public function namespacePrefixWorksWithLeadingBackslash()
     {
         $path = $this->getFullFixturePath('/src');
