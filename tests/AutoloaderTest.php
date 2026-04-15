@@ -78,6 +78,18 @@ class AutoloaderTest extends TestCase
     }
 
     #[Test]
+    public function existentUnnamespacedClassCannotBeLoaded()
+    {
+        $path = $this->getFullFixturePath('/src');
+
+        $this->autoloader->registerNamespacePath('Vendor\Package\\', $path);
+
+        $this->assertClassDoesNotExist('Unexistent');
+        $this->assertClassDoesNotExist('\Unexistent');
+        $this->assertClassDoesNotExist('\Vendor\PackageUnexistent');
+    }
+
+    #[Test]
     #[DataProvider('existentImmediateClassFullyQualifiedNamesProvider')]
     public function existentClassesFromRegisteredExistentNamespaceAndRegisteredExistentPathCanBeLoaded(string $classFullyQualifiedName)
     {
