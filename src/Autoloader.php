@@ -28,6 +28,17 @@ class Autoloader
     protected array $registeredNamespacePrefixesWithPaths = [];
 
     /**
+     * Register namespace and assign a directory path.
+     *
+     * @param string $namespace
+     * @param string $path
+     */
+    public function registerNamespacePath(string $namespacePrefix, string $path): void
+    {
+        $this->registeredNamespacePrefixesWithPaths[$namespacePrefix][] = $path;
+    }
+
+    /**
      * Register autoloading function.
      */
     public function register(): void
@@ -40,6 +51,7 @@ class Autoloader
      */
     public function unregister(): void
     {
+        spl_autoload_unregister($this->loadClass(...));
     }
 
     /**
@@ -51,17 +63,13 @@ class Autoloader
      */
     public function loadClass(string $fullyQualifiedClassName): bool
     {
-        $lastBackslash = strrpos($fullyQualifiedClassName, '\\');
+        // Removing '\' characters from the beginning of the fully qualified class name
+        $namespacedClassName = ltrim(
+            string: $fullyQualifiedClassName,
+            characters: '\\'
+        );
 
-        if ($lastBackslash !== false) {
-            // Cutts of the class name with the trailing `\` character
-            $namespace = substr($fullyQualifiedClassName, 0, $lastBackslash);
-        } else {
-            // There is no namespace (class is in the global/root namespace)
-            $namespace = '';
-        }
-
-        $classFilePath = $this->findClassFilePath($namespace, $fullyQualifiedClassName);
+        $classFilePath = $this->findClassFilePath($namespacedClassName);
         $classFileNotFound = is_null($classFilePath);
 
         if ($classFileNotFound) {
@@ -79,21 +87,22 @@ class Autoloader
      *
      * @return string | null
      */
-    protected function findClassFilePath(string $processedNamespace, string $fullyQualifiedClassName): ?string
+    protected function findClassFilePath(string $processedNamespacedClassName): ?string
     {
         foreach ($this->registeredNamespacePrefixesWithPaths as $registeredNamespacePrefix => $registeredPaths) {
-            if (
-                $this->trimTrailingBackslash($processedNamespace)
-                !== $this->trimLeadingTrailingBackslash($registeredNamespacePrefix)
-            ) {
+            if (! $this->namespacedClassNameContainsNamespacePrefix(
+                $this->trimTrailingBackslash($processedNamespacedClassName),
+                $this->trimLeadingTrailingBackslash($registeredNamespacePrefix)
+            )) {
                 continue;
             }
 
             foreach ($registeredPaths as $registeredPath) {
                 $unprefixedProcessedNamespacedClassName = $this->unprefixNamespacedClassName(
-                    $fullyQualifiedClassName,
-                    $this->trimLeadingBackslash($registeredNamespacePrefix, '\\')
+                    $processedNamespacedClassName,
+                    $this->trimLeadingBackslash($registeredNamespacePrefix)
                 );
+
                 $classFilePath = $this->buildClassFilePath(
                     $registeredPath,
                     $unprefixedProcessedNamespacedClassName
@@ -125,15 +134,18 @@ class Autoloader
         return rtrim($namespace, '\\');
     }
 
-    /**
-     * Register namespace and assign a directory path.
-     *
-     * @param string $namespace
-     * @param string $path
-     */
-    public function registerNamespacePath(string $namespacePrefix, string $path): void
-    {
-        $this->registeredNamespacePrefixesWithPaths[$namespacePrefix][] = $path;
+    private function namespacedClassNameContainsNamespacePrefix(
+        string $namespacedClassName,
+        string $namespacePrefix
+    ): bool {
+        $extractedNamespacePrefix = substr(
+            string: $namespacedClassName,
+            offset: 0,
+            length: strlen($namespacePrefix)
+        );
+        $namespacedClassNameContainsNamespacePrefix = ($namespacePrefix == $extractedNamespacePrefix);
+
+        return $namespacedClassNameContainsNamespacePrefix;
     }
 
     private function unprefixNamespacedClassName(
