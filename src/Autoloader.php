@@ -92,7 +92,7 @@ class Autoloader
             foreach ($registeredPaths as $registeredPath) {
                 $unprefixedProcessedNamespacedClassName = $this->unprefixNamespacedClassName(
                     $fullyQualifiedClassName,
-                    $registeredNamespacePrefix
+                    $this->trimLeadingBackslash($registeredNamespacePrefix, '\\')
                 );
                 $classFilePath = $this->buildClassFilePath(
                     $registeredPath,
@@ -113,6 +113,11 @@ class Autoloader
     private function trimLeadingTrailingBackslash(string $namespace): string
     {
         return trim($namespace, '\\');
+    }
+
+    private function trimLeadingBackslash(string $namespace): string
+    {
+        return ltrim($namespace, '\\');
     }
 
     private function trimTrailingBackslash(string $namespace): string
