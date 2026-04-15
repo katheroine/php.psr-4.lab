@@ -12,4 +12,10 @@ namespace PHPLab\StandardPSR4;
 
 class Autoloader
 {
+    /**
+     * Register autoloading function.
+     */
+    public function register(): void
+    {
+    }
 }
