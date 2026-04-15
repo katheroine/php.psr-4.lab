@@ -89,7 +89,17 @@ class AutoloaderTest extends TestCase
     }
 
     #[Test]
-    public function registeredCorrectNamespaceWorksWithTrailingBackslash()
+    public function registeredCorrectNamespacePrefixWorksWithLeadingBackslash()
+    {
+        $path = $this->getFullFixturePath('/src');
+
+        $this->autoloader->registerNamespacePath('\Vendor\Package', $path);
+
+        $this->assertClassIsInstantiable('\Vendor\Package\Existent');
+    }
+
+    #[Test]
+    public function registeredCorrectNamespacePrefixWorksWithTrailingBackslash()
     {
         $path = $this->getFullFixturePath('/src');
 
@@ -99,7 +109,7 @@ class AutoloaderTest extends TestCase
     }
 
     #[Test]
-    public function registeredCorrectNamespaceWorksWithoutTrailingBackslash()
+    public function registeredCorrectNamespacePrefixWorksWithoutLeadingNorTrailingBackslash()
     {
         $path = $this->getFullFixturePath('/src');
 
