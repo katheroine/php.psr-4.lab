@@ -78,6 +78,19 @@ class AutoloaderTest extends TestCase
     }
 
     #[Test]
+    public function existentWronglyNamespacedClassCannotBeLoaded()
+    {
+        $path = $this->getFullFixturePath('/src');
+
+        $this->autoloader->registerNamespacePath('Vendor\Package\\', $path);
+
+        $this->assertClassDoesNotExist('\Package\Existent');
+        $this->assertClassDoesNotExist('Package\Existent');
+        $this->assertClassDoesNotExist('\Existent');
+        $this->assertClassDoesNotExist('Existent');
+    }
+
+    #[Test]
     public function existentUnnamespacedClassCannotBeLoaded()
     {
         $path = $this->getFullFixturePath('/src');
