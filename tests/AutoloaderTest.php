@@ -80,9 +80,9 @@ class AutoloaderTest extends TestCase
 
         $this->autoloader->registerNamespacePath('Vendor\Package\\', $path);
 
-        $this->assertClassDoesNotExist('Unexistent'); // TODO!!!
-        $this->assertClassDoesNotExist('\Unexistent');
-        $this->assertClassDoesNotExist('\Vendor\PackageUnexistent');
+        $this->assertClassDoesNotExist('Unnamespaced');
+        $this->assertClassDoesNotExist('\Unnamespaced');
+        $this->assertClassDoesNotExist('\Vendor\Package\Unnamespaced');
     }
 
     #[Test]
