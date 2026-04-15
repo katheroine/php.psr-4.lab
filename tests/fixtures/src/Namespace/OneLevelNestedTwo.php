@@ -2,6 +2,6 @@
 
 namespace Vendor\Package\Namespace;
 
-class OneLevelNested
+class OneLevelNestedTwo
 {
 }

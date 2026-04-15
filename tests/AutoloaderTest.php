@@ -109,7 +109,7 @@ class AutoloaderTest extends TestCase
     }
 
     #[Test]
-    #[DataProvider('existentImmediateClassFullyQualifiedNamesProvider')]
+    #[DataProvider('existentUnnestedClassFullyQualifiedNamesProvider')]
     public function properClassesCanBeLoaded(string $classFullyQualifiedName)
     {
         $path = $this->getFullFixturePath('/src');
@@ -120,13 +120,14 @@ class AutoloaderTest extends TestCase
     }
 
     #[Test]
-    public function properNestedClassesCanBeLoaded()
+    #[DataProvider('existentNestedClassFullyQualifiedNamesProvider')]
+    public function properNestedClassesCanBeLoaded(string $classFullyQualifiedName)
     {
         $path = $this->getFullFixturePath('/src');
 
         $this->autoloader->registerNamespacePath('Vendor\Package\\', $path);
 
-        $this->assertClassIsInstantiable('\Vendor\Package\Namespace\OneLevelNested');
+        $this->assertClassIsInstantiable($classFullyQualifiedName);
     }
 
     #[Test]
@@ -182,6 +183,27 @@ class AutoloaderTest extends TestCase
         $this->assertClassIsInstantiable('\Vendor\Package\Existent');
     }
 
+    public static function existentUnnestedClassFullyQualifiedNamesProvider(): array
+    {
+        return [
+            ['\Vendor\Package\ExistentOne'],
+            ['\Vendor\Package\ExistentTwo'],
+            ['\Vendor\Package\ExistentThree'],
+        ];
+    }
+
+    public static function existentNestedClassFullyQualifiedNamesProvider(): array
+    {
+        return [
+            ['\Vendor\Package\Namespace\OneLevelNestedOne'],
+            ['\Vendor\Package\Namespace\OneLevelNestedTwo'],
+            ['\Vendor\Package\Namespace\OneLevelNestedThree'],
+            ['\Vendor\Package\Namespace\Subnamespace\TwoLevelsNestedOne'],
+            ['\Vendor\Package\Namespace\Subnamespace\TwoLevelsNestedTwo'],
+            ['\Vendor\Package\Namespace\Subnamespace\TwoLevelsNestedThree'],
+        ];
+    }
+
     /**
      * Assert class does not exist.
      *
@@ -207,15 +229,6 @@ class AutoloaderTest extends TestCase
         parent::assertInstanceOf($class, $object);
 
         unset($object);
-    }
-
-    public static function existentImmediateClassFullyQualifiedNamesProvider(): array
-    {
-        return [
-            ['\Vendor\Package\ExistentOne'],
-            ['\Vendor\Package\ExistentTwo'],
-            ['\Vendor\Package\ExistentThree'],
-        ];
     }
 
     /**
