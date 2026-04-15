@@ -56,6 +56,16 @@ class AutoloaderTest extends TestCase
         $this->assertClassDoesNotExist('\Vendor\Package\Existent');
     }
 
+    #[Test]
+    public function nonexistentClassCannotBeLoaded()
+    {
+        $path = $this->getFullFixturePath('/src');
+
+        $this->autoloader->registerNamespacePath('Vendor\Package', $path);
+
+        $this->assertClassDoesNotExist('\Vendor\Package\Nonexistent');
+    }
+
     /**
      * Assert class does not exist.
      *
