@@ -54,7 +54,8 @@ class Autoloader
         $lastBackslash = strrpos($fullyQualifiedClassName, '\\');
 
         if ($lastBackslash !== false) {
-            $namespace = substr($fullyQualifiedClassName, 0, $lastBackslash);
+            // Cutts of the class name but leaves the trailing `\` character
+            $namespace = substr($fullyQualifiedClassName, 0, $lastBackslash + 1);
         } else {
             // There is no namespace (class is in the global/root namespace)
             $namespace = '';
@@ -78,10 +79,10 @@ class Autoloader
      *
      * @return string | null
      */
-    protected function findClassFilePath(string $processedNamespacedClassName, string $fullyQualifiedClassName): ?string
+    protected function findClassFilePath(string $processedNamespace, string $fullyQualifiedClassName): ?string
     {
         foreach ($this->registeredNamespacePrefixesWithPaths as $registeredNamespacePrefix => $registeredPaths) {
-            if ($processedNamespacedClassName !== $registeredNamespacePrefix) {
+            if ($processedNamespace !== $registeredNamespacePrefix) {
                 continue;
             }
 
