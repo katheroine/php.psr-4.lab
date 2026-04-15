@@ -131,6 +131,18 @@ class AutoloaderTest extends TestCase
     }
 
     #[Test]
+    public function classIsLoadedAccordingToSpecificNamespace()
+    {
+        $path = $this->getFullFixturePath('/src');
+
+        $this->autoloader->registerNamespacePath('Vendor\Package\\', $path);
+
+        $this->assertEquals('Unnested', \Vendor\Package\SomeClass::LABEL);
+        $this->assertEquals('Nested', \Vendor\Package\Namespace\SomeClass::LABEL);
+        $this->assertEquals('Subnested', \Vendor\Package\Namespace\Subnamespace\SomeClass::LABEL);
+    }
+
+    #[Test]
     public function namespacePrefixWorksWithLeadingBackslash()
     {
         $path = $this->getFullFixturePath('/src');
