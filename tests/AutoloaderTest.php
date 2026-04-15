@@ -74,17 +74,19 @@ class AutoloaderTest extends TestCase
     }
 
     #[Test]
-    public function existentClassFromRegisteredExistentNamespaceAndRegisteredExistentPathCanBeLoaded()
+    public function unnamespacedClassCannotBeLoaded()
     {
         $path = $this->getFullFixturePath('/src');
 
         $this->autoloader->registerNamespacePath('Vendor\Package\\', $path);
 
-        $this->assertClassIsInstantiable('\Vendor\Package\Existent');
+        $this->assertClassDoesNotExist('Unexistent'); // TODO!!!
+        $this->assertClassDoesNotExist('\Unexistent');
+        $this->assertClassDoesNotExist('\Vendor\PackageUnexistent');
     }
 
     #[Test]
-    public function existentWronglyNamespacedClassCannotBeLoaded()
+    public function wronglyNamespacedClassCannotBeLoaded()
     {
         $path = $this->getFullFixturePath('/src');
 
@@ -97,20 +99,18 @@ class AutoloaderTest extends TestCase
     }
 
     #[Test]
-    public function existentUnnamespacedClassCannotBeLoaded()
+    public function properClassCanBeLoaded()
     {
         $path = $this->getFullFixturePath('/src');
 
         $this->autoloader->registerNamespacePath('Vendor\Package\\', $path);
 
-        $this->assertClassDoesNotExist('Unexistent');
-        $this->assertClassDoesNotExist('\Unexistent');
-        $this->assertClassDoesNotExist('\Vendor\PackageUnexistent');
+        $this->assertClassIsInstantiable('\Vendor\Package\Existent');
     }
 
     #[Test]
     #[DataProvider('existentImmediateClassFullyQualifiedNamesProvider')]
-    public function existentClassesFromRegisteredExistentNamespaceAndRegisteredExistentPathCanBeLoaded(string $classFullyQualifiedName)
+    public function properClassesCanBeLoaded(string $classFullyQualifiedName)
     {
         $path = $this->getFullFixturePath('/src');
 
@@ -120,7 +120,7 @@ class AutoloaderTest extends TestCase
     }
 
     #[Test]
-    public function registeredCorrectNamespacePrefixWorksWithLeadingBackslash()
+    public function namespacePrefixWorksWithLeadingBackslash()
     {
         $path = $this->getFullFixturePath('/src');
 
@@ -130,7 +130,7 @@ class AutoloaderTest extends TestCase
     }
 
     #[Test]
-    public function registeredCorrectNamespacePrefixWorksWithTrailingBackslash()
+    public function namespacePrefixWorksWithTrailingBackslash()
     {
         $path = $this->getFullFixturePath('/src');
 
@@ -140,7 +140,7 @@ class AutoloaderTest extends TestCase
     }
 
     #[Test]
-    public function registeredCorrectNamespacePrefixWorksWithLeadingAndTrailingBackslash()
+    public function namespacePrefixWorksWithLeadingAndTrailingBackslash()
     {
         $path = $this->getFullFixturePath('/src');
 
@@ -150,7 +150,7 @@ class AutoloaderTest extends TestCase
     }
 
     #[Test]
-    public function registeredCorrectNamespacePrefixWorksWithoutLeadingNorTrailingBackslash()
+    public function namespacePrefixWorksWithoutLeadingNorTrailingBackslash()
     {
         $path = $this->getFullFixturePath('/src');
 
@@ -160,7 +160,7 @@ class AutoloaderTest extends TestCase
     }
 
     #[Test]
-    public function caseSensitivityIsEnforcedForRequestedFullyQualifiedClassName()
+    public function caseSensitivityIsEnforcedForLoadingClassName()
     {
         $path = $this->getFullFixturePath('/src');
 
@@ -169,6 +169,7 @@ class AutoloaderTest extends TestCase
         $this->assertClassDoesNotExist('\vendor\package\existent');
         $this->assertClassDoesNotExist('\Vendor\package\existent');
         $this->assertClassDoesNotExist('\Vendor\Package\existent');
+        $this->assertClassIsInstantiable('\Vendor\Package\Existent');
     }
 
     /**
