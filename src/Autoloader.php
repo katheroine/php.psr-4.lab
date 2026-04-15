@@ -17,6 +17,7 @@ class Autoloader
      */
     public function register(): void
     {
+        require(__DIR__ . '/../tests/fixtures/src/Existent.php');
     }
 
     /**
