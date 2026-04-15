@@ -37,6 +37,18 @@ class AutoloaderTest extends TestCase
     }
 
     /**
+     * Assert class does not exist.
+     *
+     * @param string $class
+     */
+    protected static function assertClassDoesNotExist(string $class): void
+    {
+        $classIncluded = class_exists($class);
+
+        parent::assertFalse($classIncluded);
+    }
+
+    /**
      * Sets up the fixture, for example, open a network connection.
      * This method is called before a test is executed.
      */

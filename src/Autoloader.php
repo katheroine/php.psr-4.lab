@@ -18,4 +18,14 @@ class Autoloader
     public function register(): void
     {
     }
+
+    /**
+     * Register namespace and assign a directory path.
+     *
+     * @param string $namespace
+     * @param string $path
+     */
+    public function registerNamespacePath(string $namespacePrefix, string $path): void
+    {
+    }
 }
