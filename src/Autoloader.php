@@ -84,7 +84,7 @@ class Autoloader
         foreach ($this->registeredNamespacePrefixesWithPaths as $registeredNamespacePrefix => $registeredPaths) {
             if (
                 $this->trimTrailingBackslash($processedNamespace)
-                !== $this->trimTrailingBackslash($registeredNamespacePrefix)
+                !== $this->trimLeadingTrailingBackslash($registeredNamespacePrefix)
             ) {
                 continue;
             }
@@ -108,6 +108,11 @@ class Autoloader
         }
 
         return null;
+    }
+
+    private function trimLeadingTrailingBackslash(string $namespace): string
+    {
+        return trim($namespace, '\\');
     }
 
     private function trimTrailingBackslash(string $namespace): string
