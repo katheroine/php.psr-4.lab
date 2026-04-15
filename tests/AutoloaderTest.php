@@ -108,6 +108,18 @@ class AutoloaderTest extends TestCase
         parent::assertFalse($classIncluded);
     }
 
+    #[Test]
+    public function caseSensitivityIsEnforcedForRequestedFullyQualifiedClassName()
+    {
+        $path = $this->getFullFixturePath('/src');
+
+        $this->autoloader->registerNamespacePath('Vendor\Package\\', $path);
+
+        $this->assertClassDoesNotExist('\vendor\package\existent');
+        $this->assertClassDoesNotExist('\Vendor\package\existent');
+        $this->assertClassDoesNotExist('\Vendor\Package\existent');
+    }
+
     /**
      * Assert there is possibility of creating an instance
      * of the given class.
