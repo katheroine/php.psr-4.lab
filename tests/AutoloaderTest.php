@@ -28,6 +28,12 @@ class AutoloaderTest extends TestCase
     private Autoloader $autoloader;
 
     #[Test]
+    public function undoneRegistrationHasNoEffect()
+    {
+        $this->assertClassDoesNotExist('\Vendor\Package\Existent');
+    }
+
+    #[Test]
     public function nonexistentPathRegistrationHasNoEffect()
     {
         $path = $this->getFullFixturePath('/nonexistent');
