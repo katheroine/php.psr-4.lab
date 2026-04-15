@@ -31,7 +31,7 @@ class AutoloaderTest extends TestCase
     {
         $path = $this->getFullFixturePath('/nonexistent');
 
-        $this->autoloader->registerNamespacePath('Vendor\Package', $path);
+        $this->autoloader->registerNamespacePath('Vendor\Package\\', $path);
 
         $this->assertClassDoesNotExist('\Vendor\Package\Existent');
     }
@@ -41,7 +41,7 @@ class AutoloaderTest extends TestCase
     {
         $path = $this->getFullFixturePath('/empty');
 
-        $this->autoloader->registerNamespacePath('Vendor\Package', $path);
+        $this->autoloader->registerNamespacePath('Vendor\Package\\', $path);
 
         $this->assertClassDoesNotExist('\Vendor\Package\Existent');
     }
@@ -51,7 +51,7 @@ class AutoloaderTest extends TestCase
     {
         $path = $this->getFullFixturePath('/src');
 
-        $this->autoloader->registerNamespacePath('Nonexistent', $path);
+        $this->autoloader->registerNamespacePath('Nonexistent\\', $path);
 
         $this->assertClassDoesNotExist('\Vendor\Package\Existent');
     }
@@ -61,7 +61,7 @@ class AutoloaderTest extends TestCase
     {
         $path = $this->getFullFixturePath('/src');
 
-        $this->autoloader->registerNamespacePath('Vendor\Package', $path);
+        $this->autoloader->registerNamespacePath('Vendor\Package\\', $path);
 
         $this->assertClassDoesNotExist('\Vendor\Package\Nonexistent');
     }
@@ -71,7 +71,7 @@ class AutoloaderTest extends TestCase
     {
         $path = $this->getFullFixturePath('/src');
 
-        $this->autoloader->registerNamespacePath('Vendor\Package', $path);
+        $this->autoloader->registerNamespacePath('Vendor\Package\\', $path);
 
         $this->assertClassIsInstantiable('\Vendor\Package\Existent');
     }
