@@ -157,6 +157,20 @@ class AutoloaderTest extends TestCase
     }
 
     #[Test]
+    public function classWithLessSpecificNamespacePrefixIsLoadedWhenPathWithMoreSpecificNamespaceIsNotFound()
+    {
+        $pathOne = $this->getFullFixturePath('/unexistent');
+        $pathTwo = $this->getFullFixturePath('/unexistent');
+        $pathThree = $this->getFullFixturePath('/opt');
+
+        $this->autoloader->registerNamespacePath('Vendor\Package\\', $pathTwo);
+        $this->autoloader->registerNamespacePath('Vendor\\', $pathThree);
+        $this->autoloader->registerNamespacePath('Vendor\\', $pathOne);
+
+        $this->assertEquals('Less Specific', \Vendor\Package\Namespace\Subnamespace\OtherClass::LABEL);
+    }
+
+    #[Test]
     public function properClassesFromVariousPathsAreLoaded()
     {
         $pathOne = $this->getFullFixturePath('/lib');
