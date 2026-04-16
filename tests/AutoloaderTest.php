@@ -157,6 +157,22 @@ class AutoloaderTest extends TestCase
     }
 
     #[Test]
+    public function properClassesFromVariousPathsAreLoaded()
+    {
+        $pathOne = $this->getFullFixturePath('/lib');
+        $pathTwo = $this->getFullFixturePath('/src');
+        $pathThree = $this->getFullFixturePath('/opt');
+
+        $this->autoloader->registerNamespacePath('Vendor\Package\\', $pathOne);
+        $this->autoloader->registerNamespacePath('Vendor\Package\\', $pathTwo);
+        $this->autoloader->registerNamespacePath('Vendor\Package\\', $pathThree);
+
+        $this->assertEquals('Two', \Vendor\Package\AnotherClass::LABEL);
+        $this->assertEquals('Three', \Vendor\Package\Namespace\Subnamespace\AnotherClass::LABEL);
+        $this->assertEquals('One', \Vendor\Package\Namespace\AnotherClass::LABEL);
+    }
+
+    #[Test]
     public function namespacePrefixWorksWithLeadingBackslash()
     {
         $path = $this->getFullFixturePath('/src');
