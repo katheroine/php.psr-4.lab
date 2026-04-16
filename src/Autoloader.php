@@ -35,7 +35,10 @@ class Autoloader
      */
     public function registerNamespacePath(string $namespacePrefix, string $path): void
     {
-        $this->registeredNamespacePrefixesWithPaths[$namespacePrefix][] = $path;
+        $normalisedNamespacePrefix = trim($namespacePrefix, self::NAMESPACE_SEPARATOR)
+            . self::NAMESPACE_SEPARATOR;
+
+        $this->registeredNamespacePrefixesWithPaths[$normalisedNamespacePrefix][] = $path;
     }
 
     /**
@@ -63,13 +66,7 @@ class Autoloader
      */
     public function loadClass(string $fullyQualifiedClassName): bool
     {
-        // Removing '\' characters from the beginning of the fully qualified class name
-        $namespacedClassName = ltrim(
-            string: $fullyQualifiedClassName,
-            characters: '\\'
-        );
-
-        $classFilePath = $this->findClassFilePath($namespacedClassName);
+        $classFilePath = $this->findClassFilePath($fullyQualifiedClassName);
         $classFileNotFound = is_null($classFilePath);
 
         if ($classFileNotFound) {
@@ -93,8 +90,8 @@ class Autoloader
 
         foreach ($this->registeredNamespacePrefixesWithPaths as $registeredNamespacePrefix => $registeredPaths) {
             if (! $this->namespacedClassNameContainsNamespacePrefix(
-                $this->trimTrailingBackslash($processedNamespacedClassName),
-                $this->trimLeadingTrailingBackslash($registeredNamespacePrefix)
+                $processedNamespacedClassName,
+                $registeredNamespacePrefix
             )) {
                 continue;
             }
@@ -102,53 +99,25 @@ class Autoloader
             $matchingRegisteredNamespacePrefixesWithPaths[$registeredNamespacePrefix] = $registeredPaths;
         }
 
-        // $chosenRegisteredNamespacePrefix = null;
         $maxNamespacePrefixSegmentsCount = 0;
         $chosenRegisteredPaths = null;
-        // var_dump($this->registeredNamespacePrefixesWithPaths);
 
         foreach($matchingRegisteredNamespacePrefixesWithPaths as $registeredNamespacePrefix => $registeredPaths) {
             $namespacePrefixSegmentsCount = $this->countNamespacePrefixSegments($registeredNamespacePrefix);
             if ($namespacePrefixSegmentsCount > $maxNamespacePrefixSegmentsCount) {
-                // $chosenRegisteredNamespacePrefix = $registeredNamespacePrefix;
                 $maxNamespacePrefixSegmentsCount = $namespacePrefixSegmentsCount;
                 $chosenRegisteredPaths = $registeredPaths;
-                // var_dump($maxNamespacePrefixSegmentsCount);
-                // var_dump($registeredNamespacePrefix);
-                // print("---\n\n");
             }
-            // var_dump($registeredNamespacePrefix);
-            // print("---\n\n");
         }
 
         if (is_null($chosenRegisteredPaths)) {
             return null;
         }
 
-        // foreach ($matchingRegisteredNamespacePrefixesWithPaths as $registeredNamespacePrefix => $registeredPaths) {
-        //     foreach ($registeredPaths as $registeredPath) {
-        //         $unprefixedProcessedNamespacedClassName = $this->unprefixNamespacedClassName(
-        //             $processedNamespacedClassName,
-        //             $this->trimLeadingBackslash($registeredNamespacePrefix)
-        //         );
-
-        //         $classFilePath = $this->buildClassFilePath(
-        //             $registeredPath,
-        //             $unprefixedProcessedNamespacedClassName
-        //         );
-
-        //         $classFileExists = is_file($classFilePath);
-
-        //         if ($classFileExists) {
-        //             return $classFilePath;
-        //         }
-        //     }
-        // }
-
         foreach ($chosenRegisteredPaths as $registeredPath) {
             $unprefixedProcessedNamespacedClassName = $this->unprefixNamespacedClassName(
                 $processedNamespacedClassName,
-                $this->trimLeadingBackslash($registeredNamespacePrefix)
+                $registeredNamespacePrefix
             );
 
             $classFilePath = $this->buildClassFilePath(
@@ -177,21 +146,6 @@ class Autoloader
                 )
             )
         );
-    }
-
-    private function trimLeadingTrailingBackslash(string $namespace): string
-    {
-        return trim($namespace, '\\');
-    }
-
-    private function trimLeadingBackslash(string $namespace): string
-    {
-        return ltrim($namespace, '\\');
-    }
-
-    private function trimTrailingBackslash(string $namespace): string
-    {
-        return rtrim($namespace, '\\');
     }
 
     private function namespacedClassNameContainsNamespacePrefix(
