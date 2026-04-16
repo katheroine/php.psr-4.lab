@@ -28,9 +28,9 @@ class Autoloader
     protected array $registeredNamespacePrefixesWithPaths = [];
 
     /**
-     * Register namespace and assign a directory path.
+     * Register namespace prefix and assign a directory path.
      *
-     * @param string $namespace
+     * @param string $namespacePrefix
      * @param string $path
      */
     public function registerNamespacePath(string $namespacePrefix, string $path): void
@@ -46,7 +46,7 @@ class Autoloader
      */
     public function register(): void
     {
-        spl_autoload_register($this->loadClass(...), true);
+        spl_autoload_register($this->loadClass(...));
     }
 
     /**
@@ -84,23 +84,25 @@ class Autoloader
      * Find full path of the file that contains
      * the declaration of the automatically loaded class.
      *
+     * @param string $processedNamespacedClassName
+     *
      * @return string | null
      */
     protected function findClassFilePath(string $processedNamespacedClassName): ?string
     {
-        $reorderedMatchingRegisteredNamespacePrefixesWithPaths = $this->reorderMatchingRegisteredNamespacePrefixesWithPaths(
-            $this->findMatchingRegisteredNamespacePrefixesWithPaths($processedNamespacedClassName)
+        $namespacePrefixesWithPaths = $this->sortNamespacePrefixesBySpecificity(
+            $this->findRegisteredNamespacePrefixesWithPaths($processedNamespacedClassName)
         );
 
-        foreach($reorderedMatchingRegisteredNamespacePrefixesWithPaths as $matchingRegisteredNamespacePrefix => $matchingRegisteredPaths) {
+        foreach($namespacePrefixesWithPaths as $namespacePrefix => $paths) {
             $unprefixedProcessedNamespacedClassName = $this->unprefixNamespacedClassName(
                 $processedNamespacedClassName,
-                $matchingRegisteredNamespacePrefix
+                $namespacePrefix
             );
 
-            foreach ($matchingRegisteredPaths as $registeredPath) {
+            foreach ($paths as $path) {
                 $classFilePath = $this->buildClassFilePath(
-                    $registeredPath,
+                    $path,
                     $unprefixedProcessedNamespacedClassName
                 );
 
@@ -115,7 +117,7 @@ class Autoloader
         return null;
     }
 
-    private function reorderMatchingRegisteredNamespacePrefixesWithPaths(array $matchingRegisteredNamespacePrefixesWithPaths): array
+    private function sortNamespacePrefixesBySpecificity(array $matchingRegisteredNamespacePrefixesWithPaths): array
     {
         uksort($matchingRegisteredNamespacePrefixesWithPaths, fn($a, $b) =>
             $this->countNamespacePrefixSegments($b) <=> $this->countNamespacePrefixSegments($a)
@@ -124,19 +126,19 @@ class Autoloader
         return $matchingRegisteredNamespacePrefixesWithPaths;
     }
 
-    private function findMatchingRegisteredNamespacePrefixesWithPaths(string $processedNamespacedClassName): array
+    private function findRegisteredNamespacePrefixesWithPaths(string $processedNamespacedClassName): array
     {
         $matchingRegisteredNamespacePrefixesWithPaths = [];
 
-        foreach ($this->registeredNamespacePrefixesWithPaths as $registeredNamespacePrefix => $registeredPaths) {
-            if (! $this->namespacedClassNameContainsNamespacePrefix(
+        foreach ($this->registeredNamespacePrefixesWithPaths as $namespacePrefix => $paths) {
+            if (! $this->hasNamespacePrefixMatch(
                 $processedNamespacedClassName,
-                $registeredNamespacePrefix
+                $namespacePrefix
             )) {
                 continue;
             }
 
-            $matchingRegisteredNamespacePrefixesWithPaths[$registeredNamespacePrefix] = $registeredPaths;
+            $matchingRegisteredNamespacePrefixesWithPaths[$namespacePrefix] = $paths;
         }
 
         return $matchingRegisteredNamespacePrefixesWithPaths;
@@ -155,7 +157,7 @@ class Autoloader
         );
     }
 
-    private function namespacedClassNameContainsNamespacePrefix(
+    private function hasNamespacePrefixMatch(
         string $namespacedClassName,
         string $namespacePrefix
     ): bool {
