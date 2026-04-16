@@ -119,7 +119,7 @@ class AutoloaderTest extends TestCase
     }
 
     #[Test]
-    public function properClassCanBeLoadedManuallyWithNoLeadingBackslash(): void
+    public function properClassCanBeLoadedManually(): void
     {
         $path = $this->getFullFixturePath('/src');
 

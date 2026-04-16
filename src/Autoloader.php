@@ -66,7 +66,9 @@ class Autoloader
      */
     public function loadClass(string $fullyQualifiedClassName): bool
     {
-        $classFilePath = $this->findClassFilePath($fullyQualifiedClassName);
+        $processedNamespacedClassName = ltrim($fullyQualifiedClassName, self::NAMESPACE_SEPARATOR);
+
+        $classFilePath = $this->findClassFilePath($processedNamespacedClassName);
         $classFileNotFound = is_null($classFilePath);
 
         if ($classFileNotFound) {
