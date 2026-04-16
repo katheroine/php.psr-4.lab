@@ -75,7 +75,7 @@ class Autoloader
             return false;
         }
 
-        require($classFilePath);
+        require_once($classFilePath);
 
         return true;
     }
