@@ -187,6 +187,16 @@ class AutoloaderTest extends TestCase
     }
 
     #[Test]
+    public function uderscoreCharacterHasNoSpecialMeaningInNames()
+    {
+        $path = $this->getFullFixturePath('/src');
+
+        $this->autoloader->registerNamespacePath('Vendor\Package\\', $path);
+
+        $this->assertClassIsInstantiable('\Vendor\Package\Name_Space\Sub_Name_Space\Some_Class');
+    }
+
+    #[Test]
     public function namespacePrefixWorksWithLeadingBackslash()
     {
         $path = $this->getFullFixturePath('/src');
@@ -227,7 +237,7 @@ class AutoloaderTest extends TestCase
     }
 
     #[Test]
-    public function caseSensitivityIsEnforcedForLoadingClassName()
+    public function caseSensitivityIsKeptForLoadingClassName()
     {
         $path = $this->getFullFixturePath('/src');
 
