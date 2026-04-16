@@ -109,6 +109,16 @@ class AutoloaderTest extends TestCase
     }
 
     #[Test]
+    public function properClassCanBeLoadedWithNoLeadingBackslash()
+    {
+        $path = $this->getFullFixturePath('/src');
+
+        $this->autoloader->registerNamespacePath('Vendor\Package\\', $path);
+
+        $this->assertClassIsInstantiable('Vendor\Package\Existent');
+    }
+
+    #[Test]
     #[DataProvider('existentUnnestedClassFullyQualifiedNamesProvider')]
     public function properClassesCanBeLoaded(string $classFullyQualifiedName)
     {
@@ -292,7 +302,7 @@ class AutoloaderTest extends TestCase
     {
         $object = new $class();
 
-        parent::assertInstanceOf($class, $object);
+        self::assertInstanceOf($class, $object);
 
         unset($object);
     }
