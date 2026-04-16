@@ -89,6 +89,8 @@ class Autoloader
      */
     protected function findClassFilePath(string $processedNamespacedClassName): ?string
     {
+        $matchingRegisteredNamespacePrefixesWithPaths = [];
+
         foreach ($this->registeredNamespacePrefixesWithPaths as $registeredNamespacePrefix => $registeredPaths) {
             if (! $this->namespacedClassNameContainsNamespacePrefix(
                 $this->trimTrailingBackslash($processedNamespacedClassName),
@@ -97,26 +99,84 @@ class Autoloader
                 continue;
             }
 
-            foreach ($registeredPaths as $registeredPath) {
-                $unprefixedProcessedNamespacedClassName = $this->unprefixNamespacedClassName(
-                    $processedNamespacedClassName,
-                    $this->trimLeadingBackslash($registeredNamespacePrefix)
-                );
+            $matchingRegisteredNamespacePrefixesWithPaths[$registeredNamespacePrefix] = $registeredPaths;
+        }
 
-                $classFilePath = $this->buildClassFilePath(
-                    $registeredPath,
-                    $unprefixedProcessedNamespacedClassName
-                );
+        // $chosenRegisteredNamespacePrefix = null;
+        $maxNamespacePrefixSegmentsCount = 0;
+        $chosenRegisteredPaths = null;
+        // var_dump($this->registeredNamespacePrefixesWithPaths);
 
-                $classFileExists = is_file($classFilePath);
+        foreach($matchingRegisteredNamespacePrefixesWithPaths as $registeredNamespacePrefix => $registeredPaths) {
+            $namespacePrefixSegmentsCount = $this->countNamespacePrefixSegments($registeredNamespacePrefix);
+            if ($namespacePrefixSegmentsCount > $maxNamespacePrefixSegmentsCount) {
+                // $chosenRegisteredNamespacePrefix = $registeredNamespacePrefix;
+                $maxNamespacePrefixSegmentsCount = $namespacePrefixSegmentsCount;
+                $chosenRegisteredPaths = $registeredPaths;
+                // var_dump($maxNamespacePrefixSegmentsCount);
+                // var_dump($registeredNamespacePrefix);
+                // print("---\n\n");
+            }
+            // var_dump($registeredNamespacePrefix);
+            // print("---\n\n");
+        }
 
-                if ($classFileExists) {
-                    return $classFilePath;
-                }
+        if (is_null($chosenRegisteredPaths)) {
+            return null;
+        }
+
+        // foreach ($matchingRegisteredNamespacePrefixesWithPaths as $registeredNamespacePrefix => $registeredPaths) {
+        //     foreach ($registeredPaths as $registeredPath) {
+        //         $unprefixedProcessedNamespacedClassName = $this->unprefixNamespacedClassName(
+        //             $processedNamespacedClassName,
+        //             $this->trimLeadingBackslash($registeredNamespacePrefix)
+        //         );
+
+        //         $classFilePath = $this->buildClassFilePath(
+        //             $registeredPath,
+        //             $unprefixedProcessedNamespacedClassName
+        //         );
+
+        //         $classFileExists = is_file($classFilePath);
+
+        //         if ($classFileExists) {
+        //             return $classFilePath;
+        //         }
+        //     }
+        // }
+
+        foreach ($chosenRegisteredPaths as $registeredPath) {
+            $unprefixedProcessedNamespacedClassName = $this->unprefixNamespacedClassName(
+                $processedNamespacedClassName,
+                $this->trimLeadingBackslash($registeredNamespacePrefix)
+            );
+
+            $classFilePath = $this->buildClassFilePath(
+                $registeredPath,
+                $unprefixedProcessedNamespacedClassName
+            );
+
+            $classFileExists = is_file($classFilePath);
+
+            if ($classFileExists) {
+                return $classFilePath;
             }
         }
 
         return null;
+    }
+
+    private function countNamespacePrefixSegments(string $namespacePrefix): int
+    {
+        return count(
+            explode(
+                separator: self::NAMESPACE_SEPARATOR,
+                string: trim(
+                    string: $namespacePrefix,
+                    characters: self::NAMESPACE_SEPARATOR
+                )
+            )
+        );
     }
 
     private function trimLeadingTrailingBackslash(string $namespace): string
