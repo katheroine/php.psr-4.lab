@@ -147,9 +147,11 @@ class AutoloaderTest extends TestCase
     {
         $pathOne = $this->getFullFixturePath('/lib');
         $pathTwo = $this->getFullFixturePath('/src');
+        $pathThree = $this->getFullFixturePath('/opt');
 
         $this->autoloader->registerNamespacePath('Vendor\\', $pathOne);
         $this->autoloader->registerNamespacePath('Vendor\Package\\', $pathTwo);
+        $this->autoloader->registerNamespacePath('Vendor\\', $pathThree);
 
         $this->assertEquals('More Specific', \Vendor\Package\Namespace\Subnamespace\OtherClass::LABEL);
     }
