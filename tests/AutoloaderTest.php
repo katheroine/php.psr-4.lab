@@ -119,22 +119,6 @@ class AutoloaderTest extends TestCase
     }
 
     #[Test]
-    public function properClassCanBeLoadedManually(): void
-    {
-        $path = $this->getFullFixturePath('/src');
-
-        $this->autoloader->registerNamespacePath('Vendor\Package\\', $path);
-
-        // Called directly — PHP does NOT normalise the FQCN here,
-        // unlike when the autoloader is triggered via new ClassName()
-        $this->autoloader->loadClass('\Vendor\Package\Existent');
-
-        $this->assertTrue(
-            class_exists('\Vendor\Package\Existent', false)
-        );
-    }
-
-    #[Test]
     #[DataProvider('existentUnnestedClassFullyQualifiedNamesProvider')]
     public function properClassesCanBeLoaded(string $classFullyQualifiedName)
     {
@@ -210,6 +194,34 @@ class AutoloaderTest extends TestCase
         $this->assertEquals('Two', \Vendor\Package\AnotherClass::LABEL);
         $this->assertEquals('Three', \Vendor\Package\Namespace\Subnamespace\AnotherClass::LABEL);
         $this->assertEquals('One', \Vendor\Package\Namespace\AnotherClass::LABEL);
+    }
+
+    #[Test]
+    public function classCanBeLoadedManually(): void
+    {
+        $path = $this->getFullFixturePath('/src');
+
+        $this->autoloader->registerNamespacePath('Vendor\Package\\', $path);
+
+        // Called directly — PHP does NOT normalise the FQCN here,
+        // unlike when the autoloader is triggered via new ClassName()
+        $this->autoloader->loadClass('\Vendor\Package\Existent');
+
+        $this->assertTrue(
+            class_exists('\Vendor\Package\Existent', false)
+        );
+    }
+
+    #[Test]
+    public function classCanBeLoadedManuallyWithNoErrorWhenItIsAlreadyLoaded()
+    {
+        $path = $this->getFullFixturePath('/src');
+
+        $this->autoloader->registerNamespacePath('Vendor\Package\\', $path);
+
+        require($this->getFullFixturePath('/src/Existent.php'));
+        $this->autoloader->loadClass('\Vendor\Package\Existent');
+        $this->assertClassIsInstantiable('\Vendor\Package\Existent');
     }
 
     #[Test]
