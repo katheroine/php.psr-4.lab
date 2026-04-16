@@ -86,57 +86,40 @@ class Autoloader
      */
     protected function findClassFilePath(string $processedNamespacedClassName): ?string
     {
-        list(
-            $matchingRegisteredNamespacePrefix,
-            $matchingRegisteredPaths
-        ) = $this->findMatchingRegisteredNamespacePrefixAndPaths($processedNamespacedClassName);
-
-        if (is_null($matchingRegisteredPaths)) {
-            return null;
-        }
-
-        $unprefixedProcessedNamespacedClassName = $this->unprefixNamespacedClassName(
-            $processedNamespacedClassName,
-            $matchingRegisteredNamespacePrefix
+        $reorderedMatchingRegisteredNamespacePrefixesWithPaths = $this->reorderMatchingRegisteredNamespacePrefixesWithPaths(
+            $this->findMatchingRegisteredNamespacePrefixesWithPaths($processedNamespacedClassName)
         );
 
-        foreach ($matchingRegisteredPaths as $registeredPath) {
-            $classFilePath = $this->buildClassFilePath(
-                $registeredPath,
-                $unprefixedProcessedNamespacedClassName
+        foreach($reorderedMatchingRegisteredNamespacePrefixesWithPaths as $matchingRegisteredNamespacePrefix => $matchingRegisteredPaths) {
+            $unprefixedProcessedNamespacedClassName = $this->unprefixNamespacedClassName(
+                $processedNamespacedClassName,
+                $matchingRegisteredNamespacePrefix
             );
 
-            $classFileExists = is_file($classFilePath);
+            foreach ($matchingRegisteredPaths as $registeredPath) {
+                $classFilePath = $this->buildClassFilePath(
+                    $registeredPath,
+                    $unprefixedProcessedNamespacedClassName
+                );
 
-            if ($classFileExists) {
-                return $classFilePath;
+                $classFileExists = is_file($classFilePath);
+
+                if ($classFileExists) {
+                    return $classFilePath;
+                }
             }
         }
 
         return null;
     }
 
-    private function findMatchingRegisteredNamespacePrefixAndPaths(string $processedNamespacedClassName): array
+    private function reorderMatchingRegisteredNamespacePrefixesWithPaths(array $matchingRegisteredNamespacePrefixesWithPaths): array
     {
-        $matchingRegisteredNamespacePrefixesWithPaths = $this->findMatchingRegisteredNamespacePrefixesWithPaths($processedNamespacedClassName);
+        uksort($matchingRegisteredNamespacePrefixesWithPaths, fn($a, $b) =>
+            $this->countNamespacePrefixSegments($b) <=> $this->countNamespacePrefixSegments($a)
+        );
 
-        $maxNamespacePrefixSegmentsCount = 0;
-        $matchingRegisteredNamespacePrefix = null;
-        $matchingRegisteredPaths = null;
-
-        foreach($matchingRegisteredNamespacePrefixesWithPaths as $registeredNamespacePrefix => $registeredPaths) {
-            $namespacePrefixSegmentsCount = $this->countNamespacePrefixSegments($registeredNamespacePrefix);
-            if ($namespacePrefixSegmentsCount > $maxNamespacePrefixSegmentsCount) {
-                $maxNamespacePrefixSegmentsCount = $namespacePrefixSegmentsCount;
-                $matchingRegisteredNamespacePrefix = $registeredNamespacePrefix;
-                $matchingRegisteredPaths = $registeredPaths;
-            }
-        }
-
-        return [
-            $matchingRegisteredNamespacePrefix,
-            $matchingRegisteredPaths
-        ];
+        return $matchingRegisteredNamespacePrefixesWithPaths;
     }
 
     private function findMatchingRegisteredNamespacePrefixesWithPaths(string $processedNamespacedClassName): array
