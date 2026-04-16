@@ -119,6 +119,22 @@ class AutoloaderTest extends TestCase
     }
 
     #[Test]
+    public function properClassCanBeLoadedManuallyWithNoLeadingBackslash(): void
+    {
+        $path = $this->getFullFixturePath('/src');
+
+        $this->autoloader->registerNamespacePath('Vendor\Package\\', $path);
+
+        // Called directly — PHP does NOT normalise the FQCN here,
+        // unlike when the autoloader is triggered via new ClassName()
+        $this->autoloader->loadClass('\Vendor\Package\Existent');
+
+        $this->assertTrue(
+            class_exists('\Vendor\Package\Existent', false)
+        );
+    }
+
+    #[Test]
     #[DataProvider('existentUnnestedClassFullyQualifiedNamesProvider')]
     public function properClassesCanBeLoaded(string $classFullyQualifiedName)
     {
