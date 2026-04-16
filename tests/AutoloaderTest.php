@@ -143,6 +143,18 @@ class AutoloaderTest extends TestCase
     }
 
     #[Test]
+    public function classWithMoreSpecificNamespacePrefixIsLoaded()
+    {
+        $pathOne = $this->getFullFixturePath('/lib');
+        $pathTwo = $this->getFullFixturePath('/src');
+
+        $this->autoloader->registerNamespacePath('Vendor\\', $pathOne);
+        $this->autoloader->registerNamespacePath('Vendor\Package\\', $pathTwo);
+
+        $this->assertEquals('More Specific', \Vendor\Package\Namespace\Subnamespace\OtherClass::LABEL);
+    }
+
+    #[Test]
     public function namespacePrefixWorksWithLeadingBackslash()
     {
         $path = $this->getFullFixturePath('/src');
