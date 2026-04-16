@@ -86,40 +86,21 @@ class Autoloader
      */
     protected function findClassFilePath(string $processedNamespacedClassName): ?string
     {
-        $matchingRegisteredNamespacePrefixesWithPaths = [];
+        list(
+            $matchingRegisteredNamespacePrefix,
+            $matchingRegisteredPaths
+        ) = $this->findMatchingRegisteredNamespacePrefixAndPaths($processedNamespacedClassName);
 
-        foreach ($this->registeredNamespacePrefixesWithPaths as $registeredNamespacePrefix => $registeredPaths) {
-            if (! $this->namespacedClassNameContainsNamespacePrefix(
-                $processedNamespacedClassName,
-                $registeredNamespacePrefix
-            )) {
-                continue;
-            }
-
-            $matchingRegisteredNamespacePrefixesWithPaths[$registeredNamespacePrefix] = $registeredPaths;
-        }
-
-        $maxNamespacePrefixSegmentsCount = 0;
-        $chosenRegisteredPaths = null;
-
-        foreach($matchingRegisteredNamespacePrefixesWithPaths as $registeredNamespacePrefix => $registeredPaths) {
-            $namespacePrefixSegmentsCount = $this->countNamespacePrefixSegments($registeredNamespacePrefix);
-            if ($namespacePrefixSegmentsCount > $maxNamespacePrefixSegmentsCount) {
-                $maxNamespacePrefixSegmentsCount = $namespacePrefixSegmentsCount;
-                $chosenRegisteredPaths = $registeredPaths;
-            }
-        }
-
-        if (is_null($chosenRegisteredPaths)) {
+        if (is_null($matchingRegisteredPaths)) {
             return null;
         }
 
-        foreach ($chosenRegisteredPaths as $registeredPath) {
-            $unprefixedProcessedNamespacedClassName = $this->unprefixNamespacedClassName(
-                $processedNamespacedClassName,
-                $registeredNamespacePrefix
-            );
+        $unprefixedProcessedNamespacedClassName = $this->unprefixNamespacedClassName(
+            $processedNamespacedClassName,
+            $matchingRegisteredNamespacePrefix
+        );
 
+        foreach ($matchingRegisteredPaths as $registeredPath) {
             $classFilePath = $this->buildClassFilePath(
                 $registeredPath,
                 $unprefixedProcessedNamespacedClassName
@@ -133,6 +114,47 @@ class Autoloader
         }
 
         return null;
+    }
+
+    private function findMatchingRegisteredNamespacePrefixAndPaths(string $processedNamespacedClassName): array
+    {
+        $matchingRegisteredNamespacePrefixesWithPaths = $this->findMatchingRegisteredNamespacePrefixesWithPaths($processedNamespacedClassName);
+
+        $maxNamespacePrefixSegmentsCount = 0;
+        $matchingRegisteredNamespacePrefix = null;
+        $matchingRegisteredPaths = null;
+
+        foreach($matchingRegisteredNamespacePrefixesWithPaths as $registeredNamespacePrefix => $registeredPaths) {
+            $namespacePrefixSegmentsCount = $this->countNamespacePrefixSegments($registeredNamespacePrefix);
+            if ($namespacePrefixSegmentsCount > $maxNamespacePrefixSegmentsCount) {
+                $maxNamespacePrefixSegmentsCount = $namespacePrefixSegmentsCount;
+                $matchingRegisteredNamespacePrefix = $registeredNamespacePrefix;
+                $matchingRegisteredPaths = $registeredPaths;
+            }
+        }
+
+        return [
+            $matchingRegisteredNamespacePrefix,
+            $matchingRegisteredPaths
+        ];
+    }
+
+    private function findMatchingRegisteredNamespacePrefixesWithPaths(string $processedNamespacedClassName): array
+    {
+        $matchingRegisteredNamespacePrefixesWithPaths = [];
+
+        foreach ($this->registeredNamespacePrefixesWithPaths as $registeredNamespacePrefix => $registeredPaths) {
+            if (! $this->namespacedClassNameContainsNamespacePrefix(
+                $processedNamespacedClassName,
+                $registeredNamespacePrefix
+            )) {
+                continue;
+            }
+
+            $matchingRegisteredNamespacePrefixesWithPaths[$registeredNamespacePrefix] = $registeredPaths;
+        }
+
+        return $matchingRegisteredNamespacePrefixesWithPaths;
     }
 
     private function countNamespacePrefixSegments(string $namespacePrefix): int
