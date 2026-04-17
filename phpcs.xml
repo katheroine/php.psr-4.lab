@@ -5,11 +5,14 @@
     <arg value="sp"/>
     <arg name="extensions" value="php"/>
 
+    <config name="php_version" value="80400"/>
+
     <config name="installed_paths" value="/var/www/vendor/squizlabs/php_codesniffer/src/Standards"/>
 
     <file>src</file>
     <file>tests</file>
 
-    <rule ref="PSR1"/>
+    <exclude-pattern>./tests/fixtures/*</exclude-pattern>
+
     <rule ref="PSR12"/>
 </ruleset>
