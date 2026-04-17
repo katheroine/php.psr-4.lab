@@ -317,7 +317,7 @@ class AutoloaderTest extends TestCase
     {
         $classIncluded = class_exists($class);
 
-        parent::assertFalse($classIncluded);
+        self::assertFalse($classIncluded);
     }
 
     /**
