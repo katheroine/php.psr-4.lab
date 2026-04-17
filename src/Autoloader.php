@@ -16,6 +16,26 @@ class Autoloader
     private const string CLASS_FILE_EXTENSION = '.php';
 
     /**
+     * This property is used
+     * to freeze a single instance of autoloading function
+     * so that it will be possible
+     * to register and unregister the same closure instance
+     * by the spl_autoload_register and spl_autoload_unregister functions.
+     *
+     * Public readability allows it to be used with functions like spl_autoload_functions
+     * outside of the class.
+     */
+    public private(set) \Closure $autoloading {
+        get {
+            if (!isset($this->autoloading)) {
+                $this->autoloading = $this->loadClass(...);
+            }
+
+            return $this->autoloading;
+        }
+    }
+
+    /**
      * Namespace prefixes with assigned directory paths.
      *
      * As in PSR-4 documentation (https://www.php-fig.org/psr/psr-4/#2-specification):
@@ -46,7 +66,7 @@ class Autoloader
      */
     public function register(): void
     {
-        spl_autoload_register($this->loadClass(...));
+        spl_autoload_register($this->autoloading);
     }
 
     /**
@@ -54,17 +74,21 @@ class Autoloader
      */
     public function unregister(): void
     {
-        spl_autoload_unregister($this->loadClass(...));
+        spl_autoload_unregister($this->autoloading);
     }
 
     /**
      * Search for the class file path and load it.
      *
+     * This method is not used directly.
+     * Instead, it is assigned to a closure property
+     * to properly register and unregister the same closure instance.
+     *
      * @param string $fullyQualifiedClassName
      *
      * @return boolean
      */
-    public function loadClass(string $fullyQualifiedClassName): bool
+    private function loadClass(string $fullyQualifiedClassName): bool
     {
         $processedNamespacedClassName = ltrim($fullyQualifiedClassName, self::NAMESPACE_SEPARATOR);
 

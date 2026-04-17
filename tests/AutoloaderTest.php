@@ -28,6 +28,24 @@ class AutoloaderTest extends TestCase
     private Autoloader $autoloader;
 
     #[Test]
+    public function registerWorkdProperly()
+    {
+        $autoloadingFunctions = spl_autoload_functions();
+
+        $this->assertContains($this->autoloader->autoloading, $autoloadingFunctions);
+    }
+
+    #[Test]
+    public function unregisterWorksProperly()
+    {
+        $this->autoloader->unregister();
+
+        $autoloadingFunctions = spl_autoload_functions();
+
+        $this->assertNotContains($this->autoloader->autoloading, $autoloadingFunctions);
+    }
+
+    #[Test]
     public function undoneRegistrationHasNoEffect()
     {
         $this->assertClassDoesNotExist('\Vendor\Package\Existent');
@@ -181,7 +199,7 @@ class AutoloaderTest extends TestCase
     }
 
     #[Test]
-    public function properClassesFromVariousPathsAreLoaded()
+    public function classesFromVariousPathsAreLoaded()
     {
         $pathOne = $this->getFullFixturePath('/lib');
         $pathTwo = $this->getFullFixturePath('/src');
@@ -205,7 +223,7 @@ class AutoloaderTest extends TestCase
 
         // Called directly — PHP does NOT normalise the FQCN here,
         // unlike when the autoloader is triggered via new ClassName()
-        $this->autoloader->loadClass('\Vendor\Package\Existent');
+        ($this->autoloader->autoloading)('\Vendor\Package\Existent');
 
         $this->assertTrue(
             class_exists('\Vendor\Package\Existent', false)
@@ -220,7 +238,7 @@ class AutoloaderTest extends TestCase
         $this->autoloader->registerNamespacePath('Vendor\Package\\', $path);
 
         require($this->getFullFixturePath('/src/Existent.php'));
-        $this->autoloader->loadClass('\Vendor\Package\Existent');
+        ($this->autoloader->autoloading)('\Vendor\Package\Existent');
         $this->assertClassIsInstantiable('\Vendor\Package\Existent');
     }
 
